@@ -1,0 +1,249 @@
+/* General Page Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f7fa;
+    margin: 0;
+    padding: 80px 20px 20px; /* Top padding adjusted to account for fixed navbar */
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 40px;
+}
+
+h2 {
+    text-align: center;
+    margin-top: 0;
+    color: #2c3e50;
+}
+
+/* Form Styles */
+form {
+    background: #ffffff;
+    border-radius: 8px;
+    padding: 25px;
+    max-width: 700px;
+    margin: 0 auto 50px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    display: block;
+    margin-top: 15px;
+    font-weight: 600;
+}
+
+input[type="text"],
+input[type="file"],
+select,
+textarea {
+    width: 100%;
+    padding: 8px 12px;
+    margin-top: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    background-color: #3498db;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background-color: #2980b9;
+}
+
+/* Availability Section */
+.schedule-day {
+    margin-bottom: 25px;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 15px;
+    background-color: #fafafa;
+}
+
+.schedule-day strong {
+    font-size: 16px;
+    display: inline-block;
+    margin-bottom: 10px;
+    color: #34495e;
+}
+
+.schedule-day label {
+    display: inline-block;
+    margin-left: 10px;
+    font-weight: normal;
+}
+
+.time-range-select {
+    margin-top: 10px;
+}
+
+/* Navbar Styles */
+/* Navbar Styles */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background-color: #007bff;
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 25px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.navbar-left a {
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+    text-decoration: none;
+}
+
+.navbar-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.navbar-right a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.navbar-right a:hover {
+    color: #d1e9ff;
+}
+
+/* Profile image */
+.navbar-right img {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #fff;
+}
+
+/* Notification styles */
+.notification-wrapper {
+    position: relative;
+}
+
+.notification-icon {
+    font-size: 20px;
+    cursor: pointer;
+    position: relative;
+}
+
+.notification-icon::after {
+    content: "";
+    position: absolute;
+    top: -5px;
+    right: -6px;
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+/* Dropdown box */
+.notification-box {
+    position: absolute;
+    top: 30px;
+    right: 0;
+    width: 250px;
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    padding: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: none;
+    z-index: 999;
+}
+
+.notification-box.active {
+    display: block;
+}
+
+.notification-box p {
+    margin: 0;
+    font-size: 14px;
+}
+
+
+/* Responsive Navbar */
+@media (max-width: 768px) {
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+        height: auto;
+        padding: 10px 20px;
+    }
+
+    .navbar-left, .navbar-right {
+        width: 100%;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .navbar-right {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .notification-box {
+        right: 10px;
+        left: auto;
+    }
+}
+
+/* //////////////////////////////////////// */
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    form {
+        padding: 15px;
+    }
+
+    input, select {
+        font-size: 13px;
+    }
+
+    button {
+        font-size: 14px;
+        padding: 10px 16px;
+    }
+
+    .navbar {
+        flex-direction: column;
+        height: auto;
+        padding: 10px;
+    }
+
+    .navbar .left-section,
+    .navbar .right-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .navbar a {
+        margin: 5px 0;
+    }
+}
