@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Doctor\AppointmentController;
 
 require __DIR__.'/auth.php';
 
@@ -16,8 +17,13 @@ Route::middleware(['auth', 'role:doctor'])->prefix('doctor')->name('doctor.')->g
 // Patient routes
 Route::middleware(['auth', 'role:patient'])->group(function () {
     Route::get('/patient/dashboard', [\App\Http\Controllers\Patient\PatientDashboardController::class, 'index'])->name('patient.dashboard');
+    
+    // Appointment routes
+    Route::get('/patient/appointments', [\App\Http\Controllers\Patient\AppointmentController::class, 'index'])->name('patient.appointments');
     Route::get('/patient/doctors/{doctor}/book', [\App\Http\Controllers\Patient\AppointmentController::class, 'showBookingForm'])->name('patient.appointments.create');
     Route::post('/patient/appointments', [\App\Http\Controllers\Patient\AppointmentController::class, 'store'])->name('patient.appointments.store');
+    Route::post('/patient/appointments/{id}/cancel', [\App\Http\Controllers\Patient\AppointmentController::class, 'cancel'])->name('patient.appointments.cancel');
+    Route::post('/patient/appointments/{id}/reschedule', [\App\Http\Controllers\Patient\AppointmentController::class, 'reschedule'])->name('patient.appointments.reschedule');
 });
 
 // Authentication routes
@@ -65,7 +71,7 @@ Route::middleware(['auth', 'role:patient'])->group(function () {
 
 Route::post('/logout', function () {
     Auth::logout();
-    return redirect('/login');
+    return redirect('/');
 })->name('logout');
 
 ///////
@@ -79,4 +85,15 @@ Route::post('/logout', function () {
 //     });
 // });
 
+// Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
 
+
+// routes/web.php
+
+use App\Http\Controllers\PatientAppointmentController;
+
+// Booking page
+Route::get('/book-appointment/{doctor}', [PatientAppointmentController::class, 'create'])->name('patient.book');
+
+// Handle form POST
+// Route::post('/book-appointment', [PatientAppointmentController::class, 'store'])->name('patient.appointments.store');

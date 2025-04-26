@@ -11,11 +11,23 @@ class Patient extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'medical_record', 'date_of_birth'];
+    protected $fillable = [
+        'user_id',
+        'medical_record',
+        'date_of_birth'
+    ];
 
-    // Define the relationship to the User model
+    protected $primaryKey = 'patient_id';
+
+    // Relationship with User
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    // Relationship with Appointments
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
     }
 }

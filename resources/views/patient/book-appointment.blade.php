@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Book Appointment</title>
     <link rel="stylesheet" href="{{ asset('css/patient-dashboard.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -114,13 +115,16 @@
 
         .time-slots {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
             margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
         }
 
         .time-slot {
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #e3f2fd;
             border-radius: 8px;
             text-align: center;
@@ -128,6 +132,8 @@
             font-weight: 500;
             color: #2c3e50;
             transition: all 0.3s ease;
+            min-width: 100px;
+            margin: 5px;
         }
 
         .time-slot:hover {
@@ -142,11 +148,15 @@
         }
 
         .time-slot.unavailable {
-            background: #f44336;
+            background-color: #f44336;
             color: white;
-            border-color: #f44336;
             cursor: not-allowed;
             opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .time-slot.unavailable:hover {
+            background-color: #f44336;
         }
 
         .book-appointment-btn {
@@ -210,9 +220,39 @@
                 grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             }
         }
+
+        .alert-success {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeIn 0.5s;
+        }
+
+        .alert-danger {
+            background-color: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
+    
     <nav class="navbar">
         <ul>
             <li><a href="{{ route('patient.dashboard') }}">Back to Dashboard</a></li>
@@ -232,7 +272,10 @@
 
         <div class="booking-form">
             <h3>Book Appointment</h3>
-            <form action="{{ route('patient.appointments.store') }}" method="POST">
+            
+            <div id="message-container"></div>
+
+            <form action="{{ route('patient.appointments.store') }}" method="POST" id="appointmentForm">
                 @csrf
                 <input type="hidden" name="doctor_id" value="{{ $doctor->id }}">
                 <input type="hidden" name="appointment_date" id="selected_date">
@@ -245,7 +288,8 @@
                             <button type="button" 
                                     class="day-button" 
                                     data-day="{{ $schedule->day }}"
-                                    onclick="selectDay(this, '{{ $schedule->day }}', {{ $schedule->start_time }}, {{ $schedule->end_time }})">
+                                    data-start-time="{{ $schedule->start_time }}"
+                                    data-end-time="{{ $schedule->end_time }}">
                                 {{ $schedule->day }}
                             </button>
                         @endforeach
@@ -261,10 +305,123 @@
 
                 <button type="submit" class="book-appointment-btn" id="submitBtn" disabled>Confirm Appointment</button>
             </form>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const form = document.getElementById('appointmentForm');
+                    const messageContainer = document.getElementById('message-container');
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+                    
+                    form.addEventListener('submit', function(e) {
+                        e.preventDefault(); // Prevent default form submission
+                        
+                        if (!selectedDay || !selectedTime) {
+                            showMessage('Please select both a day and time slot before confirming.', 'danger');
+                            return false;
+                        }
+
+                        // Create FormData object
+                        const formData = new FormData(form);
+                        
+                        // Convert FormData to JSON
+                        const jsonData = {};
+                        formData.forEach((value, key) => {
+                            jsonData[key] = value;
+                        });
+                        
+                        // Submit the form using fetch API
+                        fetch(form.action, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': csrfToken,
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            },
+                            body: JSON.stringify(jsonData)
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.json().then(data => {
+                                    throw new Error(data.message || 'An error occurred while booking the appointment');
+                                });
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            if (data.success) {
+                                showMessage(data.message, 'success');
+                                
+                                // Reset form
+                                form.reset();
+                                document.getElementById('submitBtn').disabled = true;
+                                document.querySelectorAll('.day-button').forEach(btn => btn.classList.remove('active'));
+                                document.querySelectorAll('.time-slot').forEach(slot => slot.classList.remove('selected'));
+                                document.getElementById('timeSlots').innerHTML = '';
+                            } else {
+                                showMessage(data.message || 'An error occurred while booking the appointment', 'danger');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showMessage(error.message || 'An error occurred while booking the appointment', 'danger');
+                        });
+                    });
+
+                    function showMessage(message, type) {
+                        // Clear any existing messages
+                        messageContainer.innerHTML = '';
+                        
+                        // Create message element
+                        const messageDiv = document.createElement('div');
+                        messageDiv.className = `alert alert-${type}`;
+                        messageDiv.innerHTML = `
+                            <span style="flex: 1;">${message}</span>
+                            <button type="button" class="close-alert" style="background: none; border: none; color: white; font-size: 20px; cursor: pointer; margin-left: 10px;">&times;</button>
+                        `;
+                        
+                        // Add to container
+                        messageContainer.appendChild(messageDiv);
+                        
+                        // Add close button functionality
+                        const closeButton = messageDiv.querySelector('.close-alert');
+                        closeButton.addEventListener('click', function() {
+                            messageDiv.style.display = 'none';
+                        });
+                        
+                        // Auto-hide after 5 seconds
+                        setTimeout(() => {
+                            messageDiv.style.display = 'none';
+                        }, 5000);
+                    }
+                });
+            </script>
         </div>
     </div>
 
     <script>
+        // Handle closing alerts
+        document.addEventListener('DOMContentLoaded', function() {
+            const closeButtons = document.querySelectorAll('.close-alert');
+            closeButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    this.parentElement.style.display = 'none';
+                });
+            });
+
+            // Auto-hide success message after 5 seconds
+            const successAlert = document.querySelector('.alert-success');
+            if (successAlert) {
+                setTimeout(() => {
+                    successAlert.style.display = 'none';
+                }, 5000);
+            }
+        });
+
+        // Debug the existing appointments
+        console.log('Existing appointments:', @json($existingAppointments));
+        
+        const existingAppointments = @json($existingAppointments);
         let selectedDay = null;
         let selectedTime = null;
 
@@ -272,6 +429,12 @@
             const period = hour >= 12 ? 'PM' : 'AM';
             const displayHour = hour % 12 || 12;
             return `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+        }
+
+        function isTimeSlotBooked(date, time) {
+            return existingAppointments.some(appointment => 
+                appointment.date === date && appointment.time === time
+            );
         }
 
         function selectDay(button, day, startTime, endTime) {
@@ -287,13 +450,32 @@
             // Create 30-minute intervals
             for (let hour = startTime; hour < endTime; hour++) {
                 for (let minute = 0; minute < 60; minute += 30) {
-                    const timeString = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-                    const displayTime = formatTime(hour, minute);
+                    const timeString = formatTime(hour, minute);
+                    
+                    // Get the date for this time slot
+                    const today = new Date();
+                    while (today.getDay() !== getDayNumber(day)) {
+                        today.setDate(today.getDate() + 1);
+                    }
+                    const formattedDate = today.toISOString().split('T')[0];
+                    
+                    // Check if this time slot is booked
+                    const isBooked = isTimeSlotBooked(formattedDate, timeString);
+                    
+                    // Create time slot element
                     const timeSlot = document.createElement('div');
-                    timeSlot.className = 'time-slot';
-                    timeSlot.textContent = displayTime;
+                    timeSlot.className = 'time-slot' + (isBooked ? ' unavailable' : '');
+                    timeSlot.textContent = timeString;
                     timeSlot.dataset.time = timeString;
-                    timeSlot.onclick = () => selectTime(timeSlot, timeString);
+                    
+                    if (!isBooked) {
+                        timeSlot.onclick = () => selectTime(timeSlot, timeString);
+                    } else {
+                        timeSlot.title = 'This slot is already booked';
+                        timeSlot.style.cursor = 'not-allowed';
+                    }
+                    
+                    // Add to container
                     timeSlotsContainer.appendChild(timeSlot);
                 }
             }
@@ -313,13 +495,51 @@
 
             // Set the hidden input values
             document.getElementById('selected_time').value = time;
+            
+            // Get the selected day and convert it to a proper date format
+            const selectedDay = document.querySelector('.day-button.active').dataset.day;
+            const today = new Date();
+            
+            // Find the next occurrence of the selected day
+            while (today.getDay() !== getDayNumber(selectedDay)) {
+                today.setDate(today.getDate() + 1);
+            }
+            
+            // Format the date as YYYY-MM-DD
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('selected_date').value = formattedDate;
+            
             document.getElementById('submitBtn').disabled = false;
         }
 
-        // Get current date and set it as minimum
-        const today = new Date();
-        const minDate = today.toISOString().split('T')[0];
-        document.getElementById('appointment_date').min = minDate;
+        // Helper function to convert day name to day number
+        function getDayNumber(dayName) {
+            const days = {
+                'Sunday': 0,
+                'Monday': 1,
+                'Tuesday': 2,
+                'Wednesday': 3,
+                'Thursday': 4,
+                'Friday': 5,
+                'Saturday': 6
+            };
+            return days[dayName];
+        }
+
+        // Initialize the form
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get all day buttons
+            const dayButtons = document.querySelectorAll('.day-button');
+            
+            // Add click event to each button
+            dayButtons.forEach(button => {
+                const day = button.dataset.day;
+                const startTime = parseInt(button.dataset.startTime);
+                const endTime = parseInt(button.dataset.endTime);
+                
+                button.onclick = () => selectDay(button, day, startTime, endTime);
+            });
+        });
     </script>
 </body>
-</html> 
+</html>
