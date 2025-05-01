@@ -24,7 +24,7 @@ class Doctor extends Model
     // Define the relationship to the User model
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     public function schedules()
@@ -36,6 +36,12 @@ class Doctor extends Model
     public function appointments()
     {
         return $this->hasMany(Appointment::class);
+    }
+
+    // Relationship with Notifications
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class)->orderBy('created_at', 'desc');
     }
 }
 

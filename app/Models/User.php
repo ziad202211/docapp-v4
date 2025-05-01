@@ -13,13 +13,13 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
     public function doctor()
     {
-        return $this->hasOne(Doctor::class);
+        return $this->hasOne(Doctor::class, 'user_id', 'id');
     }
 
     // Define relationship with Patient
     public function patient()
     {
-        return $this->hasOne(Patient::class);
+        return $this->hasOne(Patient::class, 'user_id', 'id');
     }
     /**
      * The attributes that are mass assignable.
@@ -32,6 +32,8 @@ class User extends Authenticatable
         'password',
         'role', // Add role
         'gender', // Add gender
+        'phone', // Add phone
+        'photo', // Add photo
     ];
 
     /**

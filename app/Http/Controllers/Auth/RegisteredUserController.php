@@ -46,11 +46,16 @@ class RegisteredUserController extends Controller
     
         // Check the role and create associated doctor or patient record
         if ($validated['role'] === 'doctor') {
-            Doctor::create([
+            $doctor = new Doctor([
                 'user_id' => $user->id,
-                'specialization' => $validated['specialization'] ?? 'General',
-                'location' => 'Unknown', // You can replace or add another input for location
+                'specialization' => $validated['specialization'] ?? 'General Medicine',
+                'location' => 'Clinic',
+                'title' => 'Dr. ' . $user->name,
+                'degree' => 'MD',
+                'phone' => '000-000-0000'
             ]);
+            $user->doctor()->save($doctor);
+            \Log::info('Doctor profile created:', ['doctor' => $doctor->toArray()]);
         } elseif ($validated['role'] === 'patient') {
             Patient::create([
                 'user_id' => $user->id,

@@ -14,7 +14,9 @@ class Patient extends Model
     protected $fillable = [
         'user_id',
         'medical_record',
-        'date_of_birth'
+        'date_of_birth',
+        'photo',
+        'phone'
     ];
 
     protected $primaryKey = 'patient_id';
@@ -22,7 +24,7 @@ class Patient extends Model
     // Relationship with User
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
     // Relationship with Appointments

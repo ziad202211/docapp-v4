@@ -10,6 +10,8 @@ use App\Models\Patient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Models\Notification;
+use App\Events\AppointmentBooked;
 
 class AppointmentController extends Controller
 {
@@ -154,8 +156,73 @@ class AppointmentController extends Controller
                 \Log::info('Attempting to create appointment with data:', $appointmentData);
 
                 $appointment = Appointment::create($appointmentData);
-
                 \Log::info('Appointment created successfully:', ['appointment' => $appointment]);
+
+                // Create notification for the doctor
+                $doctor = Doctor::with('user')->find($validatedData['doctor_id']);
+                \Log::info('Doctor details:', [
+                    'doctor_id' => $doctor->id,
+                    'doctor_name' => $doctor->title,
+                    'user_id' => $doctor->user ? $doctor->user->id : 'no user',
+                    'user_email' => $doctor->user ? $doctor->user->email : 'no email'
+                ]);
+
+                if ($doctor && $doctor->user) {
+                    try {
+                        // First verify the notification doesn't already exist
+                        $existingNotification = Notification::where('doctor_id', $doctor->id)
+                            ->where('notifiable_type', 'App\Models\Appointment')
+                            ->where('notifiable_id', $appointment->id)
+                            ->first();
+
+                        if (!$existingNotification) {
+                            $notificationData = [
+                                'doctor_id' => $doctor->id,
+                                'type' => 'appointment_booked',
+                                'notifiable_type' => 'App\Models\Appointment',
+                                'notifiable_id' => $appointment->id,
+                                'data' => [
+                                    'message' => 'New Appointment Booking',
+                                    'patient_name' => $patient->user->name,
+                                    'patient_phone' => $patient->phone ?? 'Not provided',
+                                    'appointment_date' => $appointment->appointment_date,
+                                    'appointment_time' => $appointment->appointment_time,
+                                    'doctor_name' => $doctor->title,
+                                    'specialization' => $doctor->specialization,
+                                    'location' => $doctor->location,
+                                    'status' => 'pending'
+                                ]
+                            ];
+
+                            \Log::info('Creating new notification with data:', $notificationData);
+
+                            $notification = Notification::create($notificationData);
+                            \Log::info('Notification created successfully:', ['notification' => $notification->toArray()]);
+
+                            // Verify the notification exists in the database
+                            $verifyNotification = Notification::find($notification->id);
+                            \Log::info('Verified notification in database:', [
+                                'exists' => $verifyNotification ? 'yes' : 'no',
+                                'notification' => $verifyNotification ? $verifyNotification->toArray() : null
+                            ]);
+
+                            // Broadcast the event
+                            event(new AppointmentBooked($appointment, $notification));
+                        } else {
+                            \Log::info('Notification already exists:', ['notification' => $existingNotification->toArray()]);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error creating notification:', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                    }
+                } else {
+                    \Log::error('Could not create notification: Doctor or user not found', [
+                        'doctor_exists' => $doctor ? 'yes' : 'no',
+                        'user_exists' => $doctor && $doctor->user ? 'yes' : 'no'
+                    ]);
+                }
 
                 // Format the date and time for display
                 $formattedDate = date('F j, Y', strtotime($validatedData['appointment_date']));

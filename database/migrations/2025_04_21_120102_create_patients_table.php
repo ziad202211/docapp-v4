@@ -18,6 +18,8 @@ class CreatePatientsTable extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->text('medical_record')->nullable();
             $table->date('date_of_birth');
+            $table->string('photo')->nullable();
+            $table->string('phone')->nullable();
             $table->timestamps();
         });
         

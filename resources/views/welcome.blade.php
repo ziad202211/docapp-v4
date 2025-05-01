@@ -376,7 +376,7 @@
 
 <body class="antialiased">
 <div class="logo-container">
-    <img src="{{ asset('images/logo11.png') }}" alt="Logo">
+    <img src="{{ asset('images/logov2.png') }}" alt="Logo">
 </div>
 
     @if (Route::has('login'))
@@ -400,7 +400,7 @@
     
     <div class="header">
     
-        <h1>Welcome to MediCare</h1>
+        <h1>Welcome to Ekshefli</h1>
         <p>Your trusted platform for booking doctor appointments online</p>
     </div>
 
@@ -436,7 +436,7 @@
     <!-- About Us Section -->
     <div class="section" style="background-color: #e2e8f0;">
         <h2>About Us</h2>
-        <p>MediCare is a leading online platform that connects patients with professional, verified doctors across all specialties. We aim to simplify the healthcare experience by enabling seamless appointment scheduling and care access.</p>
+        <p>Ekshefli is a leading online platform that connects patients with professional, verified doctors across all specialties. We aim to simplify the healthcare experience by enabling seamless appointment scheduling and care access.</p>
     </div>
 
     <!-- Doctor Team Section -->
@@ -445,50 +445,28 @@
         <div class="team">
             <div class="team-member">
                 <img src="{{ asset('images/doctors/Doctor-PNG-Images.png') }}" alt="Doctor A">
-                <h3>Dr. Alice Carter</h3>
+                <h3>Dr. Aya Omarah</h3>
                 <p>Cardiologist</p>
             </div>
             <div class="team-member">
                 <img src="{{ asset('images/doctors/bob.png') }}" alt="Doctor B">
-                <h3>Dr. Bob Lee</h3>
+                <h3>Dr. Morad Mansoury</h3>
                 <p>Dermatologist</p>
             </div>
             <div class="team-member">
                 <img src="{{ asset('images/doctors/clara-removebg-preview.png') }}" alt="Doctor C">
-                <h3>Dr. Clara Smith</h3>
+                <h3>Dr. Sarah Haitham</h3>
                 <p>Neurologist</p>
             </div>
         </div>
     </div>
 
-    <!-- Impact Section -->
-    <!-- <div class="impact-section">
-        <h2>Our Impact</h2>
-        <div class="impact-grid">
-            <div class="impact-card">
-                <i class="fas fa-user-md impact-icon"></i>
-                <div class="impact-number">500+</div>
-                <div class="impact-label">Certified Doctors</div>
-            </div>
-            <div class="impact-card">
-                <i class="fas fa-users impact-icon"></i>
-                <div class="impact-number">10K+</div>
-                <div class="impact-label">Patients Served</div>
-            </div>
-            <div class="impact-card">
-                <i class="fas fa-star impact-icon"></i>
-                <div class="impact-number">95%</div>
-                <div class="impact-label">Positive Feedback</div>
-            </div>
-        </div>
-    </div> -->
-
     <!-- Footer Section -->
     <div class="footer">
-        <h3>MediCare</h3>
+        <h3>Ekshefli</h3>
         <p>Contact: +20 123-456-7890</p>
-        <p>Email: support@medicare.com</p>
-        <p>&copy; 2025 MediCare. All rights reserved.</p>
+        <p>Email: support@ekshefli.com</p>
+        <p>&copy; 2025 Ekshefli. All rights reserved.</p>
     </div>
 </body>
 </html>
